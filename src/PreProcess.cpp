@@ -1,33 +1,26 @@
 #include "PreProcess.hpp"
 #include <opencv2/opencv.hpp>
+#include <cmath>
 
-cv::Mat PreProcess::process(const cv::Mat& frame){
-    // 对图像使用高斯滤波进行降噪
-    cv::Mat blur;
-    cv::GaussianBlur(frame, blur, cv::Size(gaussian_k, gaussian_k), 0);
-    // 将图像转为hsv
-    cv::Mat hsv;
-    cv::cvtColor(blur, hsv, cv::COLOR_BGR2HSV);
-    // 对处理过的hsv图像进行颜色分割(提取黄色，红色，绿色)
-    // 对两个红色区间进行掩码合并
-    Mat mask1, mask2, red_mask;
-    inRange(hsv, low_red1, high_red1, mask1);
-    inRange(hsv, low_red2, high_red2, mask2);
+using namespace cv;
 
-    red_mask = mask1 | mask2;
+PreProcess::PreProcess() : gaussian_k(5), morph_k(5), min_area(30), max_area(5000), match_threshold(0.6),
+                            history_max(10), vote_threshold(7)
+{
+    // 红色 HSV 区间
+    low_red1  = Scalar(0,  120, 70);
+    high_red1 = Scalar(10, 255, 255);
+    low_red2  = Scalar(170, 120, 70);
+    high_red2 = Scalar(180, 255, 255);
 
-    // 绿色掩码合并
-    Mat green_mask;
-    inRange(hsv, low_green, high_green, green_mask);
+    // 绿色 HSV 区间
+    low_green  = Scalar(35, 50, 50);
+    high_green = Scalar(90, 255, 255);
 
-    // 黄色掩码合并
-    Mat yellow_mask;
-    inRange(hsv, low_yellow, high_yellow, yellow_mask);
+    // 黄色 HSV 区间
+    low_yellow  = Scalar(15, 100, 100);
+    high_yellow = Scalar(35, 255, 255);
 
-    // 对图像进行形态学去噪
-    Mat kernel = getStructuringElement(MORPH_RECT, Size(morph_k, morph_k));
-    morphologyEx(red_mask, red_mask, MORPH_OPEN, kernel);
-    morphologyEx(red_mask, red_mask, MORPH_CLOSE, kernel);
-
-   
+    // 形态学核
+    kernel = getStructuringElement(MORPH_RECT, Size(morph_k, morph_k));
 }
