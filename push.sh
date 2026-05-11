@@ -1,4 +1,9 @@
 #!/bin/bash
 git add .
-git commit -m "update"
+
+git status
+
+COMMIT_MSG=${1:-"update"}
+git commit -m "$COMMIT_MSG"
+
 git push origin main
