@@ -45,6 +45,7 @@ private:
     int morph_k;
     Mat kernel;
 
+    Mat last_hsv;
     Mat red_mask, yellow_mask, green_mask;
     vector<vector<Point>> red_contours, yellow_contours, green_contours;
 

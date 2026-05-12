@@ -88,7 +88,7 @@ int main(int argc, char** argv)
         imshow("Traffic Light Recognition", frame);
 
         // 按 ESC 键退出
-        if (waitKey(30) == 27) break;
+        if (waitKey(50) == 27) break;
     }
 
     // ---------- 步骤6: 释放资源 ----------

@@ -11,7 +11,7 @@ using namespace std;
 // ============================================================
 // 构造函数：初始化 HSV 阈值、形态学核，并加载模板图像
 // ============================================================
-PreProcess::PreProcess() : gaussian_k(5), morph_k(7), min_area(100), max_area(5000), match_threshold(0.6),
+PreProcess::PreProcess() : gaussian_k(5), morph_k(7), min_area(120), max_area(5000), match_threshold(0.6),
                             history_max(10), vote_threshold(7)
 {
     // 步骤1: 设置红色 HSV 区间 —— 红色在 HSV 中跨越 0° 和 180°，需两个区间
@@ -25,8 +25,10 @@ PreProcess::PreProcess() : gaussian_k(5), morph_k(7), min_area(100), max_area(50
     high_green = Scalar(90, 255, 255);
 
     // 步骤3: 设置黄色 HSV 区间
-    low_yellow  = Scalar(15, 100, 100);
-    high_yellow = Scalar(35, 255, 255);
+    // 实测视频中固定黄光区域 HSV ≈ (19~20, 150~158, 205~218)
+    // 缩紧阈值以区分"灯亮"与"外壳反射"，同时降低 S 下限排除偏色
+    low_yellow  = Scalar(20, 130, 200);
+    high_yellow = Scalar(32, 255, 255);
 
     // 步骤4: 创建形态学操作核 (5×5 矩形)
     kernel = getStructuringElement(MORPH_RECT, Size(morph_k, morph_k));
@@ -116,14 +118,27 @@ vector<Rect> PreProcess::findLightROIs(const Mat& mask)
 }
 
 // ============================================================
-// decideActiveColor：比较红/绿/黄的 ROI 数量，取最多者作为当前活跃颜色
+// decideActiveColor：按各颜色 ROI 数量 + 黄色亮度权重 判定
+//   若黄色 ROI 中心 V 值 ≥ 230（真实点亮而非反射），权重 ×3
 // ============================================================
 LightColor PreProcess::decideActiveColor(const vector<Rect>& red_rois,
                                           const vector<Rect>& green_rois,
                                           const vector<Rect>& yellow_rois)
 {
-    int r = red_rois.size(), g = green_rois.size(), y = yellow_rois.size();
-    int m = max({r, g, y});
+    double r = red_rois.size(), g = green_rois.size(), y = yellow_rois.size();
+
+    if (y > 0 && !last_hsv.empty())
+    {
+        int cx = yellow_rois[0].x + yellow_rois[0].width / 2;
+        int cy = yellow_rois[0].y + yellow_rois[0].height / 2;
+        if (cx >= 0 && cy >= 0 && cx < last_hsv.cols && cy < last_hsv.rows)
+        {
+            uchar v = last_hsv.at<Vec3b>(cy, cx)[2];
+            if (v >= 230) y *= 3.0;
+        }
+    }
+
+    double m = max({r, g, y});
     if (m == 0) return RED;
     if (r == m) return RED;
     if (g == m) return GREEN;
@@ -180,6 +195,9 @@ vector<LightInfo> PreProcess::process(const Mat& frame)
     GaussianBlur(frame, blurred, Size(gaussian_k, gaussian_k), 0);
     // BGR → HSV 转换（H 色调 / S 饱和度 / V 明度，对光照变化更鲁棒）
     cvtColor(blurred, hsv, COLOR_BGR2HSV);
+
+    // 保存 HSV 供 decideActiveColor 读取 V 值
+    last_hsv = hsv;
 
     // ---------- 步骤2: HSV 颜色分割 ----------
     // 分别生成红 / 绿 / 黄三色的二值掩码
