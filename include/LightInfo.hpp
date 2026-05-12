@@ -12,12 +12,13 @@ enum LightColor
 
 enum ArrowType
 {
-    CIRCLE,     // 圆形信号灯
-    LEFT,       // 左转箭头
-    STRAIGHT   // 直行箭头
+    CIRCLE,
+    LEFT,
+    RIGHT,
+    STRAIGHT
 };
 
-struct  LightInfo
+struct LightInfo
 {
     Rect box;
     LightColor color;

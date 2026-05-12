@@ -1,10 +1,18 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10)
+project(TrafficLightRecognition)
 
-project(project)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(OpenCV REQUIRED)
 
-set(SRC /src/*.cpp)
-include(/include/*.hpp)
+add_definitions(-DTEMPLATE_DIR="${CMAKE_SOURCE_DIR}/Tamplate")
+add_definitions(-DVIDEO_PATH="${CMAKE_SOURCE_DIR}/Tamplate/traffic.mp4")
 
-add_executable(project SRC)
+file(GLOB SOURCES src/*.cpp)
+file(GLOB HEADERS include/*.hpp)
+
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+
+target_include_directories(${PROJECT_NAME} PRIVATE include)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
