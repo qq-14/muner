@@ -1,0 +1,3 @@
+/usr/bin/cmake -E rm -f CMakeFiles/TrafficLightRecognition.dir/objects.a
+/usr/bin/x86_64-w64-mingw32-ar qc CMakeFiles/TrafficLightRecognition.dir/objects.a @CMakeFiles/TrafficLightRecognition.dir/objects1.rsp
+/usr/bin/x86_64-w64-mingw32-g++ -Wl,--whole-archive CMakeFiles/TrafficLightRecognition.dir/objects.a -Wl,--no-whole-archive -o TrafficLightRecognition.exe -Wl,--out-implib,libTrafficLightRecognition.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles/TrafficLightRecognition.dir/linklibs.rsp

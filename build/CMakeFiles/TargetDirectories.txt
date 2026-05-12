@@ -1,3 +1,0 @@
-/home/qiu/Desktop/project/muner/build/CMakeFiles/TrafficLightRecognition.dir
-/home/qiu/Desktop/project/muner/build/CMakeFiles/edit_cache.dir
-/home/qiu/Desktop/project/muner/build/CMakeFiles/rebuild_cache.dir
