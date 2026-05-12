@@ -19,18 +19,6 @@ static string colorName(LightColor c)
     }
 }
 
-static string arrowName(ArrowType a)
-{
-    switch (a)
-    {
-    case CIRCLE:   return "CIRCLE";
-    case LEFT:     return "LEFT";
-    case RIGHT:    return "RIGHT";
-    case STRAIGHT: return "STRAIGHT";
-    default:       return "UNKNOWN";
-    }
-}
-
 static Scalar colorScalar(LightColor c)
 {
     switch (c)
@@ -77,7 +65,7 @@ int main(int argc, char** argv)
             // 用对应颜色画矩形框
             rectangle(frame, l.box, colorScalar(l.color), 2);
             // 在框上方写标签，如 "GREEN LEFT"
-            string label = colorName(l.color) + " " + arrowName(l.direction);
+            string label = colorName(l.color);
             putText(frame, label, Point(l.box.x, l.box.y - 5),
                     FONT_HERSHEY_SIMPLEX, 0.5, colorScalar(l.color), 2);
         }
