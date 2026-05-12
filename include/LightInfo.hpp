@@ -6,7 +6,6 @@ using namespace cv;
 enum LightColor
 {
     RED,
-    YELLO,
     GREEN
 };
 

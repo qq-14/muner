@@ -15,7 +15,6 @@ static string colorName(LightColor c)
     {
     case RED:   return "RED";
     case GREEN: return "GREEN";
-    case YELLO: return "YELLOW";
     default:    return "UNKNOWN";
     }
 }
@@ -38,7 +37,6 @@ static Scalar colorScalar(LightColor c)
     {
     case RED:   return Scalar(0,   0,   255);   // BGR: 红
     case GREEN: return Scalar(0,   255, 0);     // BGR: 绿
-    case YELLO: return Scalar(0,   255, 255);   // BGR: 黄
     default:    return Scalar(255, 255, 255);
     }
 }

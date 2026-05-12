@@ -18,7 +18,6 @@ public:
 
     vector<vector<Point>> getRedContours() const { return red_contours; }
     vector<vector<Point>> getGreenContours() const { return green_contours; }
-    vector<vector<Point>> getYellowContours() const { return yellow_contours; }
 
 private:
     void loadTemplates();
@@ -30,24 +29,21 @@ private:
     vector<Rect> findLightROIs(const Mat& mask);
 
     LightColor decideActiveColor(const vector<Rect>& red_rois,
-                                  const vector<Rect>& green_rois,
-                                  const vector<Rect>& yellow_rois);
+                                  const vector<Rect>& green_rois);
 
     ArrowType matchArrow(const Mat& roi, LightColor color);
 
     Scalar low_red1, high_red1;
     Scalar low_red2, high_red2;
     Scalar low_green, high_green;
-    Scalar low_yellow, high_yellow;
     double min_area, max_area;
     double match_threshold;
     int gaussian_k;
     int morph_k;
     Mat kernel;
 
-    Mat last_hsv;
-    Mat red_mask, yellow_mask, green_mask;
-    vector<vector<Point>> red_contours, yellow_contours, green_contours;
+    Mat red_mask, green_mask;
+    vector<vector<Point>> red_contours, green_contours;
 
     map<LightColor, vector<pair<Mat, ArrowType>>> templates;
 
