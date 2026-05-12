@@ -8,6 +8,7 @@
 using namespace cv;
 using namespace std;
 
+// 初始化
 PreProcess::PreProcess() : gaussian_k(3), morph_k(5), min_area(200), max_area(5000), match_threshold(0.6),
                             history_max(10), vote_threshold(7)
 {
@@ -24,6 +25,7 @@ PreProcess::PreProcess() : gaussian_k(3), morph_k(5), min_area(200), max_area(50
     loadTemplates();
 }
 
+// 加载模板
 void PreProcess::loadTemplates()
 {
     string base = TEMPLATE_DIR;
@@ -32,6 +34,7 @@ void PreProcess::loadTemplates()
         {GREEN, base + "/green"}
     };
 
+    // 通过字典遍历
     for (auto& [color, dir_path] : color_map)
     {
         if (!filesystem::exists(dir_path)) continue;
@@ -58,6 +61,7 @@ void PreProcess::loadTemplates()
     }
 }
 
+// 生成掩码
 Mat PreProcess::createMask(const Mat& hsv, const Scalar& low, const Scalar& high)
 {
     Mat mask;
@@ -65,12 +69,14 @@ Mat PreProcess::createMask(const Mat& hsv, const Scalar& low, const Scalar& high
     return mask;
 }
 
+// 形态学去噪
 void PreProcess::cleanMask(Mat& mask)
 {
     morphologyEx(mask, mask, MORPH_OPEN, kernel);
     morphologyEx(mask, mask, MORPH_CLOSE, kernel);
 }
 
+// 截取视频中信号灯的ROI
 vector<Rect> PreProcess::findLightROIs(const Mat& mask)
 {
     vector<vector<Point>> contours;
@@ -87,6 +93,7 @@ vector<Rect> PreProcess::findLightROIs(const Mat& mask)
     return rois;
 }
 
+// 判断红色和绿色
 LightColor PreProcess::decideActiveColor(const vector<Rect>& red_rois,
                                           const vector<Rect>& green_rois)
 {
@@ -95,6 +102,7 @@ LightColor PreProcess::decideActiveColor(const vector<Rect>& red_rois,
     return (r >= g) ? RED : GREEN;
 }
 
+// 模板匹配
 ArrowType PreProcess::matchArrow(const Mat& roi, LightColor color)
 {
     auto it = templates.find(color);
@@ -125,6 +133,7 @@ ArrowType PreProcess::matchArrow(const Mat& roi, LightColor color)
     return (best_val >= match_threshold) ? best_type : CIRCLE;
 }
 
+// 图像预处理
 vector<LightInfo> PreProcess::process(const Mat& frame)
 {
     Mat blurred, hsv;
@@ -139,10 +148,12 @@ vector<LightInfo> PreProcess::process(const Mat& frame)
     cleanMask(red_mask);
     cleanMask(green_mask);
 
+    // 轮廓查找
     vector<vector<Point>> red_all, green_all;
     findContours(red_mask, red_all, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
     findContours(green_mask, green_all, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
 
+    // 通过面积筛查信号灯
     red_contours.clear(); green_contours.clear();
     for (auto& c : red_all)   if (contourArea(c) >= min_area && contourArea(c) <= max_area) red_contours.push_back(c);
     for (auto& c : green_all) if (contourArea(c) >= min_area && contourArea(c) <= max_area) green_contours.push_back(c);
@@ -165,8 +176,8 @@ vector<LightInfo> PreProcess::process(const Mat& frame)
     if (max_v < vote_threshold) return results;
 
     LightColor stable = LightColor(best_idx);
-    vector<Rect>* active_rois = nullptr;
-    Mat* active_mask = nullptr;
+    vector<Rect>* active_rois = nullptr;    // 定义roi指针
+    Mat* active_mask = nullptr;             // 定义掩码指针
     if (stable == RED)   { active_rois = &red_rois;   active_mask = &red_mask; }
     if (stable == GREEN) { active_rois = &green_rois; active_mask = &green_mask; }
 
